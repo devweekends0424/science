@@ -1,0 +1,69 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\title{Audited Mathematical Notes on Partition Functions and SAT Complexity}
+\date{2026-11-24}
+\begin{document}
+\maketitle
+
+\section{Definitions}
+For a 3-CNF formula $\varphi$ over $n$ variables with $m$ clauses, let $E_\varphi(y) \in \{0,\dots,m\}$ denote the number of clauses violated by assignment $y \in \{0,1\}^n$.
+
+\subsection{Partition Function}
+\begin{equation}
+Z_\varphi(z) = \sum_{y \in \{0,1\}^n} z^{E_\varphi(y)} = \sum_{k=0}^{m} c_k z^k, \qquad c_k = \#\{y \in \{0,1\}^n : E_\varphi(y) = k\}.
+\end{equation}
+Note: $Z_\varphi(0) = c_0 = \#\mathrm{SAT}(\varphi)$, which is $\#P$-complete to compute. Furthermore, $Z_\varphi(z)$ is not invariant under logically equivalent syntactic transformations of $\varphi$ (e.g., duplicating a clause shifts $E_\varphi(y)$).
+
+\subsection{Quantum / Trigonometric Amplitude}
+\begin{equation}
+A_\varphi(\theta) = 2^{-n} Z_\varphi(e^{i\theta}) = \mathbb{E}_{y \sim U}\!\left[e^{i\theta E_\varphi(y)}\right].
+\end{equation}
+At $\theta = \pi$, $A_\varphi(\pi) = 2^{-n}(N_{\mathrm{even}} - N_{\mathrm{odd}})$. Monte Carlo estimation over $N_s$ uniform samples incurs statistical noise $\Theta(1/\sqrt{N_s})$, which overwhelms signals of magnitude $2^{-\Omega(n)}$ unless $N_s = \Omega(2^{2n})$.
+
+\subsection{Complex Zero Radius and Inverse Temperature}
+With inverse temperature $\beta \in \mathbb{C}$, $Z_\varphi(\beta) = \sum_{x \in \{0,1\}^n} e^{-\beta E_\varphi(x)}$ (setting $z = e^{-\beta}$). The Lee--Yang zero radius is
+\begin{equation}
+d(\varphi) = \min \{ |z| : Z_\varphi(z) = 0 \}, \qquad Z_\varphi(i) = \sum_{x \in \{0,1\}^n} i^{E_\varphi(x)}.
+\end{equation}
+Note: $Z_\varphi(z)$ is syntactically non-invariant: $\varphi = (x)$ yields $Z_\varphi(z) = 1+z$ ($z = -1$), whereas the logically equivalent $\psi = (x) \land (x)$ yields $Z_\psi(z) = 1+z^2$ ($z = \pm i$).
+
+\subsection{Galois Group of the Partition Polynomial}
+Let $G_\varphi = \mathrm{Gal}(Z_\varphi / \mathbb{Q})$. Because $Z_\varphi(z) = \sum_{k=0}^m c_k z^k$, $G_\varphi$ depends solely on the degeneracy counts $(c_0, \dots, c_m)$, not on $\mathrm{Aut}(\varphi)$ in $\{0,1\}^n$. Generic integer polynomials have $G_\varphi \cong S_m$, while $Z(z) = 1 + z^m$ yields the abelian cyclotomic group $(\mathbb{Z}/2m\mathbb{Z})^\times$.
+
+\section{Non-uniform Advice Bounds (Karp--Lipton)}
+If $\mathrm{NP} \subseteq \mathrm{P}/\mathrm{poly}$ (polynomial-size advice/strategy guide), then the polynomial hierarchy collapses to its second level:
+\begin{equation}
+\mathrm{NP} \subseteq \mathrm{P}/\mathrm{poly} \implies \Sigma_2^P = \Pi_2^P.
+\end{equation}
+This does not imply $\mathrm{P} = \mathrm{NP}$, and fixed $O(\log n)$-bit advice cannot specify general $n$-bit satisfying assignments.
+
+\section{Entropy and Algebraic Complexity (VP vs VNP)}
+\subsection{Violation-Count Shannon Entropy}
+With $p_k = c_k / 2^n$, the Shannon entropy of the violation count distribution is
+\begin{equation}
+H(E_\varphi) = -\sum_{k=0}^{m} p_k \log_2 p_k.
+\end{equation}
+Note: Computing $p_k$ exactly requires $\#P$-hard counting of $c_k$.
+
+\subsection{Multilinear Polynomial Family in VNP}
+Viewing clause structure as formal variables $X$, the induced multilinear polynomial family $\{F_n(X, z)\}_{n \ge 1}$ satisfies
+\begin{equation}
+\{F_n\}_{n \ge 1} \in \mathrm{VNP}.
+\end{equation}
+Note: Membership $\{F_n\} \in \mathrm{VNP}$ follows directly from the definition of $\mathrm{VNP}$ and does not establish $F_n \notin \mathrm{VP}$. Moreover, a separation $\mathrm{VP} \neq \mathrm{VNP}$ over a field of characteristic $0$ does not directly imply $\mathrm{P} \neq \mathrm{NP}$ for Boolean circuits.
+
+\section{Information Theory and Proof Complexity}
+\subsection{Search Surprisal and Mutual Information with Advice}
+For $K = \#\mathrm{SAT}(\varphi)$ satisfying assignments, the uniform winning probability and surprisal are
+\begin{equation}
+p_{\mathrm{win}} = \frac{K}{2^n}, \qquad I_{\mathrm{win}} = -\log_2 p_{\mathrm{win}} = n - \log_2 K, \qquad \mathbb{E}[N_{\mathrm{trials}}] = \frac{2^n}{K} = 2^{I_{\mathrm{win}}}.
+\end{equation}
+With advice/debug history $D$ and instance $X$, the conditional mutual information is
+\begin{equation}
+I(Y; D \mid X) = H(Y \mid X) - H(Y \mid X, D).
+\end{equation}
+
+\subsection{Propositional Proof Length}
+For a proof system $P$ and tautology $\tau$, the shortest proof length is $L_P(\tau) = \min_{\pi : P(\pi)=\tau} |\pi|$. By Cook--Reckhow, $\mathrm{NP} = \mathrm{coNP}$ holds if and only if there exists a polynomially bounded propositional proof system.
+
+\end{document}

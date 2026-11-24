@@ -1,0 +1,47 @@
+{
+  "experiment": "3xorsat_advice_resilience",
+  "rounds": [
+    {
+      "n": 14,
+      "m": 20,
+      "k_bits": 4,
+      "instances": 30,
+      "no_guide": {
+        "mean_nodes": 336.367,
+        "reduction_pct": 0.0,
+        "log2_gain_per_bit": 0.0
+      },
+      "oracle_k": {
+        "mean_nodes": 40.133,
+        "reduction_pct": 88.07,
+        "log2_gain_per_bit": 0.7668
+      },
+      "structural_k": {
+        "mean_nodes": 365.533,
+        "reduction_pct": -8.67,
+        "log2_gain_per_bit": -0.03
+      }
+    },
+    {
+      "n": 16,
+      "m": 24,
+      "k_bits": 4,
+      "instances": 30,
+      "no_guide": {
+        "mean_nodes": 332.533,
+        "reduction_pct": 0.0,
+        "log2_gain_per_bit": 0.0
+      },
+      "oracle_k": {
+        "mean_nodes": 47.967,
+        "reduction_pct": 85.58,
+        "log2_gain_per_bit": 0.6983
+      },
+      "structural_k": {
+        "mean_nodes": 366.967,
+        "reduction_pct": -10.35,
+        "log2_gain_per_bit": -0.0355
+      }
+    }
+  ]
+}
