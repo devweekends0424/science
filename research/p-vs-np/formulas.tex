@@ -1,0 +1,302 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1in]{geometry}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prb}{\mathbb{P}}
+\newcommand{\SAT}{\mathrm{SAT}}
+\newcommand{\VNP}{\mathrm{VNP}}
+\newcommand{\VP}{\mathrm{VP}}
+\newcommand{\F}{\mathbb{F}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\Spl}{Spl}
+\DeclareMathOperator{\size}{size}
+
+\title{SAT Partition Functions and Algebraic Complexity:\\Formula Notebook}
+\author{AI-assisted research notes; no claim of a P vs NP proof}
+\date{24 November 2026}
+\begin{document}
+\maketitle
+
+\noindent
+\textbf{Status notation.}
+[D] definition; [I] algebraic identity; [T] theorem under stated hypotheses;
+[C] verified example/counterexample; [O] open research question.
+No statement in this notebook proves $\mathrm{P}\ne\mathrm{NP}$ or $\VP\ne\VNP$.
+
+\section{Boolean SAT and a partition polynomial [D, I]}
+Let $\varphi=C_1\land\cdots\land C_m$ be a CNF formula
+on $n$ Boolean variables, and let
+\[
+I_j(y)=
+\begin{cases}
+1,&C_j(y)=\mathrm{false},\\
+0,&C_j(y)=\mathrm{true},
+\end{cases}
+\qquad
+E_\varphi(y)=\sum_{j=1}^{m}I_j(y).
+\]
+Define
+\[
+Z_\varphi(z)=\sum_{y\in\{0,1\}^{n}}z^{E_\varphi(y)}
+=\sum_{k=0}^{m}c_kz^k,\qquad
+c_k=\#\{y:E_\varphi(y)=k\}.
+\]
+With $0^0=1$,
+\[
+Z_\varphi(0)=c_0=\#\SAT(\varphi),\qquad
+Z_\varphi(1)=2^n,\qquad
+\sum_{k=0}^{m}c_k=2^n.
+\]
+These are counting identities; they do not assert efficient
+computation of $c_0$.
+
+\section{Characteristic function, Fourier inversion, quantum amplitude [I]}
+Let $Y$ be uniformly distributed on $\{0,1\}^n$. Define
+\[
+p_k=\Prb(E_\varphi(Y)=k)=2^{-n}c_k,
+\qquad
+\mathcal{A}_\varphi(\theta)
+=\E[e^{i\theta E_\varphi(Y)}]
+=2^{-n}Z_\varphi(e^{i\theta})
+=\sum_{k=0}^{m}p_ke^{ik\theta}.
+\]
+For $\omega=e^{2\pi i/(m+1)}$,
+\[
+c_0=\frac{1}{m+1}\sum_{j=0}^{m}Z_\varphi(\omega^j)
+=\frac{2^n}{m+1}\sum_{j=0}^{m}
+\mathcal{A}_\varphi\!\left(\frac{2\pi j}{m+1}\right).
+\]
+If $U_\theta|y\rangle=e^{i\theta E_\varphi(y)}|y\rangle$,
+then
+\[
+\langle 0^n|H^{\otimes n}U_\theta H^{\otimes n}|0^n\rangle
+=\mathcal{A}_\varphi(\theta).
+\]
+This amplitude identity implies neither a quantum speedup nor a
+complexity lower bound.
+
+\section{Exact low-order statistics [I]}
+For each fixed positive integer $r$,
+\[
+\E[E_\varphi(Y)^r]
+=\sum_{j_1,\ldots,j_r=1}^{m}
+\Prb(I_{j_1}(Y)=\cdots=I_{j_r}(Y)=1).
+\]
+For any specified tuple of clauses, the joint violation
+probability is $0$ if the required literal assignments conflict,
+and otherwise $2^{-t}$, where $t$ is the number of distinct
+Boolean variables fixed by those requirements.
+Consequently, for fixed $r$, the moment can be evaluated exactly
+with $O(m^r\operatorname{poly}(n,m))$ elementary operations.
+
+If every clause has exactly three distinct variables, then
+\[
+\E[E_\varphi(Y)]=\frac m8.
+\]
+In general,
+\[
+\Var(E_\varphi)
+=\sum_j\Var(I_j)+2\sum_{j<k}\Cov(I_j,I_k).
+\]
+For the star instance
+\[
+\varphi_\star=\bigwedge_{j=1}^{m}(x\lor a_j\lor b_j),
+\]
+where all $a_j,b_j$ are distinct and different from $x$,
+\[
+\Var(E_{\varphi_\star})
+=\frac{m^2+6m}{64}.
+\]
+
+\section{Cumulants and a local convergence guarantee [T]}
+Let the clause dependency graph join clauses sharing a Boolean
+variable, let $\Delta$ be its maximum degree and $D=\Delta+1$.
+For $r\ge2$, the bounded-variable dependency-graph cumulant
+bound of F\'eray--M\'eliot--Nikeghbali yields
+\[
+|\kappa_r(E_\varphi)|
+\le m\,r^{r-2}(2D)^{r-1}
+\le m\,r![2eD]^{r-1}.
+\]
+Writing $C=2eD$, for $|\theta|<C^{-1}$, the branch of
+$\log\mathcal{A}_\varphi$ analytic at $\theta=0$ satisfies
+\[
+\log\mathcal{A}_\varphi(\theta)
+=\sum_{r=1}^{\infty}
+\frac{(i\theta)^r\kappa_r(E_\varphi)}{r!},
+\]
+and, for $R\ge1$,
+\[
+\left|
+\log\mathcal{A}_\varphi(\theta)
+-\sum_{r=1}^{R}
+\frac{(i\theta)^r\kappa_r(E_\varphi)}{r!}
+\right|
+\le
+\frac{m}{C}
+\frac{(C|\theta|)^{R+1}}{1-C|\theta|}.
+\]
+These are \emph{sufficient} convergence guarantees,
+not the exact Taylor radius.
+
+\section{Complex zeros and counterexamples [C]}
+Two clauses on five variables,
+\[
+\varphi_2=(x\lor a\lor b)\land(\neg x\lor c\lor d),
+\]
+give
+\[
+Z_{\varphi_2}(z)=8(3+z),\qquad
+\mathcal{A}_{\varphi_2}(\theta)=\frac{3+e^{i\theta}}4.
+\]
+Hence the Taylor radius of $\log\mathcal{A}_{\varphi_2}$
+about $0$ is
+\[
+\rho=\sqrt{\pi^2+(\ln3)^2}>\pi,
+\qquad\Delta=1.
+\]
+For $k$ pairwise disjoint 3-clauses,
+\[
+Z_\varphi(z)=(7+z)^k,\qquad
+\rho=\sqrt{\pi^2+(\ln7)^2}>\pi,\qquad\Delta=0.
+\]
+Conversely, with
+\[
+\begin{aligned}
+\chi={}&(x\lor y\lor\neg z)
+\land(x\lor\neg y\lor z)\\
+&\land(\neg x\lor y\lor z)
+\land(\neg x\lor\neg y\lor\neg z),
+\end{aligned}
+\]
+we have
+\[
+Z_\chi(z)=4(1+z),\qquad
+\mathcal{A}_\chi(\theta)=\frac{1+e^{i\theta}}2,\qquad
+\mathcal{A}_\chi(\pi)=0,\qquad\Delta=3.
+\]
+Thus bounded $\Delta$ alone does not determine whether
+$\log\mathcal{A}_\varphi$ is analytic at $\theta=\pi$.
+
+\section{Shannon quantities and search [D, I]}
+\[
+H(E_\varphi)
+=-\sum_{k:p_k>0}p_k\log_2p_k.
+\]
+If $c_0>0$, an independent uniform random assignment succeeds
+with probability $c_0/2^n$, so its expected number of trials is
+\[
+\E[T_{\mathrm{uniform}}]=\frac{2^n}{c_0},
+\qquad
+-\log_2\Prb(E_\varphi(Y)=0)=n-\log_2c_0.
+\]
+These are statements about uniform independent sampling,
+not lower bounds for arbitrary SAT algorithms.
+For a separately specified joint distribution of problem
+instances $X$, target assignments $Y$, and advice $D$,
+\[
+I(Y;D\mid X)=H(Y\mid X)-H(Y\mid X,D).
+\]
+Information gain alone does not imply an efficient search algorithm.
+
+\section{Symbolic polynomial family and VNP [D, I]}
+Fix a field $\F$. For $n\ge3$, let $\mathcal{C}_n$ be the
+$8\binom n3$ distinct 3-literal clauses obtained by choosing
+three different variables and an independent sign for each.
+For $C\in\mathcal{C}_n$, let $X_C$ be an indeterminate.
+For a Boolean literal $\ell$, write $v_\ell(y)=y_i$
+for $\ell=x_i$ and $v_\ell(y)=1-y_i$ for $\ell=\neg x_i$.
+If $C=(\ell_1\lor\ell_2\lor\ell_3)$, let
+\[
+I_C(y)=\prod_{t=1}^{3}(1-v_{\ell_t}(y)).
+\]
+Define a \emph{multivariate symbolic family}
+\[
+\boxed{
+F_n(\mathbf X,z)
+=\sum_{y\in\{0,1\}^n}
+\prod_{C\in\mathcal C_n}
+\bigl(1+X_C(z-1)I_C(y)\bigr).
+}
+\]
+For any 3-CNF $\varphi$ built from \emph{distinct} clauses
+in $\mathcal C_n$, let $X_C=1$ for clauses present in $\varphi$
+and $X_C=0$ otherwise. Then
+\[
+F_n(\mathbf 1_\varphi,z)=Z_\varphi(z)
+\quad\text{in }\F[z].
+\]
+If $\operatorname{char}\F=p>0$, integer coefficients are
+understood modulo $p$.
+
+Writing
+\[
+g_n(\mathbf X,z,\mathbf y)
+=\prod_{C\in\mathcal C_n}
+\bigl(1+X_C(z-1)I_C(\mathbf y)\bigr),
+\]
+the polynomials $g_n$ have polynomially bounded degree,
+variable count and arithmetic circuit size, and
+\[
+F_n(\mathbf X,z)=\sum_{\mathbf y\in\{0,1\}^n}
+g_n(\mathbf X,z,\mathbf y).
+\]
+Consequently, by the standard p-definability criterion,
+\[
+\boxed{(F_n)_{n\ge3}\in\VNP_{\F}.}
+\]
+This does \emph{not} establish VNP-completeness,
+a superpolynomial circuit lower bound, or
+$(F_n)\notin\VP_{\F}$.
+
+\section{Fixed-instance circuit warning [I]}
+For each \emph{fixed} instance $\varphi$,
+\[
+Z_\varphi(z)=c_0+c_1z+\cdots+c_mz^m
+\]
+has an arithmetic circuit of $O(m)$ gates by Horner's rule,
+when its coefficients $c_k$ may be used as field constants.
+Computing those constants uniformly is a different task.
+Therefore a standard unrestricted circuit-size lower bound
+cannot be inferred for this fixed univariate polynomial.
+
+\section{Galois examples [I]}
+For nonconstant $Z_\varphi\in\mathbb{Q}[z]$, put
+\[
+G_\varphi=\Gal(\Spl(Z_\varphi)/\mathbb Q).
+\]
+Repeated copies of the unit clause $(x)$ give
+\[
+Z_\varphi(z)=1+z^m,\qquad
+\Spl(Z_\varphi)=\mathbb Q(\zeta_{2m}),\qquad
+G_\varphi\cong(\mathbb Z/2m\mathbb Z)^\times.
+\]
+Pairwise disjoint 3-clauses give $(7+z)^k$,
+whose splitting-field Galois group is trivial.
+These counterexamples do not determine the Galois group
+of a typical random SAT-generated polynomial.
+
+\section{Open implications [O]}
+\[
+(F_n)\in\VNP_{\F}
+\quad\not\Rightarrow\quad
+(F_n)\notin\VP_{\F}.
+\]
+\[
+\text{Empirical SAT hardness correlation}
+\quad\not\Rightarrow\quad
+\mathrm{P}\ne\mathrm{NP}.
+\]
+\[
+\VP\ne\VNP
+\quad\not\Rightarrow\quad
+\mathrm{P}\ne\mathrm{NP}
+\quad\text{by any implication established here}.
+\]
+The last line records the absence of a proved bridge
+\emph{in these notes}; it is not a logical non-implication theorem.
+
+\end{document}
